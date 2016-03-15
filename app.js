@@ -13,6 +13,14 @@ app.get('/', function(req, res) {
 
 });
 
+// route delete
+app.get('/supprimer/:index', function(req, res) {
+
+    list.splice(req.params.index, 1);
+    res.redirect('/');
+
+});
+
 app.use(function(req, res, next){ 
 
     res.setHeader('Content-Type', 'text/plain');
