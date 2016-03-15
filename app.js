@@ -21,6 +21,14 @@ app.get('/supprimer/:index', function(req, res) {
 
 });
 
+// route add
+app.post('/ajouter/', urlencodedParser, function(req, res){
+	list.push(req.body.new);
+	res.redirect('/');
+
+});
+
+
 app.use(function(req, res, next){ 
 
     res.setHeader('Content-Type', 'text/plain');
