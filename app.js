@@ -1,10 +1,28 @@
-var express = require('express');
-var bodyParser = require('body-parser');
+var app = require('express')(),
+    server = require('http').createServer(app),
+    io = require('socket.io').listen(server),
+    ent = require('ent');
+    
 
-var urlencodedParser = bodyParser.urlencoded({ extended: false });
-var app = express();
+var list = []; // création d'une liste vide au démarrage du serveur
 
-var list = ["test","test2"];
+io.sockets.on('connection', function (socket) {
+    
+    // ajout dans la liste
+    socket.on('ajouter', function(nouvelItem) {
+        nouvelItem = ent.encode(nouvelItem); // sécurisation du texte saisi
+        list.push(nouvelItem);
+        socket.broadcast.emit('update'); // ordre de mise à jour vers le navigateur
+    });
+
+    //suppression de la liste
+    socket.on('supprimer', function(supprItem) {
+        list.splice(supprItem, 1);
+    socket.broadcast.emit('update'); // ordre de mise à jour vers le navigateur
+
+    });
+
+});
 
 // route home
 app.get('/', function(req, res) {
@@ -13,29 +31,5 @@ app.get('/', function(req, res) {
 
 });
 
-// route delete
-app.get('/supprimer/:index', function(req, res) {
 
-    list.splice(req.params.index, 1);
-    res.redirect('/');
-
-});
-
-// route add
-app.post('/ajouter/', urlencodedParser, function(req, res){
-	list.push(req.body.new);
-	res.redirect('/');
-
-});
-
-
-app.use(function(req, res, next){ 
-
-    res.setHeader('Content-Type', 'text/plain');
-
-    res.send(404, 'Page introuvable !');
-
-});
-
-
-app.listen(8080);
+server.listen(8080);

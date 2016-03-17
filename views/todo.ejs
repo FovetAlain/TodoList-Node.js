@@ -2,7 +2,7 @@
 
 <html>
     <head>
-        <title>Ma todolist</title>
+        <title>Ma todolist temps réel</title>
     	<style type="text/css">
     		a
     		{
@@ -15,17 +15,47 @@
    		<h1>Ma todolist</h1>
    		<ul>
    			<% list.forEach(function(todo, index){ %>
-   				<li> <a href="/supprimer/<%= index %>"> X</a> <%= todo %> </li> 
+   				<li> <a href="/" id="<%= index %>" class="Supprimer"> X</a> <%= todo %> </li> 
    			<% }) %>
    			
    		</ul>
 
-   		<form action="/ajouter/" method="post">
+   		<form action="/" method="post" id="formulaire_todo">
    			<p>
    				<label for="new">Que dois-je faire ?</label>
-   				<input type="text" name="new" id="new" autofocus="" />
+   				<input type="text" name="new" id="new" autofocus />
    				<input type="submit" />
    			</p>
    		</form>
+
+      <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+      <script src="/socket.io/socket.io.js"></script>
+      <script>
+        // Connexion à socket.io
+        var socket = io.connect('http://localhost:8080');
+
+
+        // Lorsqu'on envoie le formulaire, on transmet le nouvel item
+        $('#formulaire_todo').submit(function () {
+            var nouvelItem = $('#new').val();
+            socket.emit('ajouter', nouvelItem); // Transmet l'item à ajouter au serveur 
+            location.reload();        
+            return false; // Permet de bloquer l'envoi "classique" du formulaire
+        });
+
+        // clic sur un lien supprimer
+        $('.Supprimer').click(function(){
+            var supprItem = $(this).attr('id');
+            socket.emit('supprimer', supprItem); /// Transmet l'item à supprimer au serveur 
+            location.reload();        
+            return false; // Permet de bloquer l'envoi "classique" du formulaire
+        });
+
+        // Quand on reçoit l'ordre de mettre à jour la page, on refraichit
+        socket.on('update', function() {
+                location.reload();
+        })       
+
+      </script>
 
    	</body>
